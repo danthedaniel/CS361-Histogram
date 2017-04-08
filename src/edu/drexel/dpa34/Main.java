@@ -1,6 +1,7 @@
 package edu.drexel.dpa34;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
@@ -9,15 +10,55 @@ public class Main {
     private static int tempMin = -10;
     private static int tempMax = 35;
 
+    /**
+     * Threaded vs. Serial Histogram construction benchmark.
+     *
+     * Accepts the following command line arguments:
+     *      -NUMTHREADS <number of threads>
+     *      -NUMBINS    <number of histogram bins>
+     *      -DATASIZE   <number of data elements>
+     *
+     * @param args The command line arguments
+     */
     public static void main(String[] args) {
-        int numBuckets = 5;
-        ArrayList<Integer> dataSet = generateDataSet(100000000);
+        // Retrieve command line arguments
+        HashMap<String, Integer> argMap = parseArgs(args);
+        int numThreads = argMap.getOrDefault("-NUMTHREADS", 5);
+        int numBuckets = argMap.getOrDefault("-NUMBINS", 10);
+        int dataSize   = argMap.getOrDefault("-DATASIZE", 70000);
 
-	    ParallelHistogram parallelHist = new ParallelHistogram(4);
+        ArrayList<Integer> dataSet = generateDataSet(dataSize);
+
+	    ParallelHistogram parallelHist = new ParallelHistogram(numThreads);
         benchmark("Parallel", parallelHist, dataSet, numBuckets);
 
         SerialHistogram serialHist = new SerialHistogram();
         benchmark("Serial", serialHist, dataSet, numBuckets);
+    }
+
+    /**
+     * Parse arguments that are in the format "KEY1 <integer> KEY2 <integer>".
+     *
+     * @param args The command line argument Array
+     * @return A mapping of argument names to argument values
+     */
+    private static HashMap<String, Integer> parseArgs(String[] args) {
+        HashMap<String, Integer> argMap = new HashMap<>();
+        String currentArg = "";
+
+        for (String arg : args) {
+            if (currentArg.equals("")) {
+                currentArg = arg;
+            } else {
+                try {
+                    argMap.put(currentArg, Integer.parseInt(arg));
+                } catch (NumberFormatException e) {
+                    currentArg = arg;
+                }
+            }
+        }
+
+        return argMap;
     }
 
     /**
@@ -69,7 +110,7 @@ public class Main {
     private static void printHistogram(ArrayList<Integer> histogram) {
         System.out.print("[");
         for (int i = 0; i < histogram.size(); i++) {
-            System.out.print(histogram.get(i));
+            System.out.print("(" + i + ": " + histogram.get(i) + ")");
 
             // All elements except the last should be followed by a comma
             if (i < histogram.size() - 1) {
