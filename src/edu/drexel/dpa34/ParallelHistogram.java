@@ -5,24 +5,21 @@ import java.util.stream.IntStream;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ParallelHistogram implements Histogram {
-    public ArrayList<Integer> dataSet;
-    public ArrayList<Integer> histogram = new ArrayList();
-    public ReentrantLock lock = new ReentrantLock();
+    ArrayList<Integer> dataSet;
+    ArrayList<Integer> histogram = new ArrayList<>();
+    ReentrantLock lock = new ReentrantLock();
+    int numBuckets;
+    int dataMin;
+    int dataMax;
     private int numThreads;
-    public int dataMin;
-    public int dataMax;
 
     /**
      * Generates Histograms with the help of parallel processing.
      *
-     * @param data ArrayList of Integers that will become a Histogram
      * @param numThreads The number of threads used in the aggregation process.
      */
-    public ParallelHistogram(ArrayList<Integer> data, int numThreads) {
-        this.dataSet    = data;
+    ParallelHistogram(int numThreads) {
         this.numThreads = numThreads;
-        this.dataMin    = dataSetMin();
-        this.dataMax    = dataSetMax();
     }
 
     /**
@@ -33,13 +30,31 @@ public class ParallelHistogram implements Histogram {
      * @param numBuckets The number of buckets (bars) in the Histogram
      * @return ArrayList of size numBuckets containing Integers representing frequencies
      */
-    public ArrayList<Integer> generateHistogram(int numBuckets) {
+    public ArrayList<Integer> generateHistogram(ArrayList<Integer> data, int numBuckets) {
+        // Calculate the min and max of the data set
+        this.dataSet    = data;
+        this.dataMin    = dataSetMin();
+        this.dataMax    = dataSetMax();
+        this.numBuckets = numBuckets;
+
         // Initialize the "main-thread" histogram
         IntStream.range(0, numBuckets).forEach(i -> this.histogram.add(0));
 
-        ArrayList<Thread> threads = new ArrayList();
+        ArrayList<Thread> threads = spawnThreads();
+        awaitThreads(threads);
+
+        return this.histogram;
+    }
+
+    /**
+     * Delegate work to numThreads threads.
+     *
+     * @return The working threads
+     */
+    private ArrayList<Thread> spawnThreads() {
+        ArrayList<Thread> threads = new ArrayList<>();
         int saneThreadCount = Math.min(this.numThreads, this.dataSet.size());
-        int workloadSize = this.dataSet.size() / numBuckets; // The number of elements each thread will work on
+        int workloadSize = this.dataSet.size() / saneThreadCount; // The number of elements each thread will work on
         int startIndex = 0;
 
         // Spawn numThreads threads and add them to the threads ArrayList
@@ -51,12 +66,21 @@ public class ParallelHistogram implements Histogram {
                 endIndex = this.dataSet.size();
             }
 
-            Thread t = new Thread(new HistogramThread(this, startIndex, endIndex, numBuckets));
+            Thread t = new Thread(new HistogramThread(this, startIndex, endIndex));
             t.start();
             threads.add(t);
+            startIndex = endIndex;
         }
 
-        // Wait for each thread to finish
+        return threads;
+    }
+
+    /**
+     * Join on all Threads in an ArrayList of Threads
+     *
+     * @param threads List of threads currently operating on the data set
+     */
+    private void awaitThreads(ArrayList<Thread> threads) {
         threads.forEach(thread -> {
             try {
                 thread.join();
@@ -64,8 +88,6 @@ public class ParallelHistogram implements Histogram {
                 System.err.println("Thread was interrupted");
             }
         });
-
-        return this.histogram;
     }
 
     /**

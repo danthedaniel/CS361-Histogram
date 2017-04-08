@@ -21,17 +21,16 @@ public class HistogramThread implements Runnable {
      * @param parent The invoking object
      * @param startIndex The worker's designated starting point
      * @param endIndex The worker's designated ending point
-     * @param numBuckets The number of buckets (bars) in the Histogram
      */
-    public HistogramThread(ParallelHistogram parent, int startIndex, int endIndex, int numBuckets) {
+    HistogramThread(ParallelHistogram parent, int startIndex, int endIndex) {
         this.dataSet    = parent.dataSet;
         this.dataMin    = parent.dataMin;
         this.dataMax    = parent.dataMax;
         this.lock       = parent.lock;
         this.histogram  = parent.histogram;
+        this.numBuckets = parent.numBuckets;
         this.startIndex = startIndex;
         this.endIndex   = endIndex;
-        this.numBuckets = numBuckets;
     }
 
     /**
@@ -47,13 +46,15 @@ public class HistogramThread implements Runnable {
      * @return The current thread's results
      */
     private ArrayList<Integer> aggregateData() {
-        int bucketSize = (int) Math.ceil((this.dataMax - this.dataMin) / (double) this.numBuckets);
-        ArrayList<Integer> workerHistogram = new ArrayList();
+        // Initialize the thread's histogram
+        ArrayList<Integer> workerHistogram = new ArrayList<>();
         IntStream.range(0, this.numBuckets).forEach(i -> workerHistogram.add(0));
+
+        double bucketWidth = (this.dataMax - this.dataMin) / (double) this.numBuckets;
 
         // Aggregate the data
         this.dataSet.subList(this.startIndex, this.endIndex).forEach(val -> {
-            int index = indexForValue(val, bucketSize);
+            int index = Math.min(indexForValue(val, bucketWidth), this.numBuckets - 1);
             workerHistogram.set(index, workerHistogram.get(index) + 1);
         });
 
@@ -73,7 +74,7 @@ public class HistogramThread implements Runnable {
                 this.histogram.set(i, newValue);
             });
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
@@ -81,9 +82,10 @@ public class HistogramThread implements Runnable {
      * Calculate where an element belongs in the histogram.
      *
      * @param value An element from this.dataSet
+     * @param bucketWidth The width of each bucket
      * @return The appropriate index in the histogram
      */
-    private int indexForValue(int value, int bucketSize) {
-        return (int) Math.round((value - this.dataMin) / (double) bucketSize);
+    private int indexForValue(int value, double bucketWidth) {
+        return (int) Math.floor((value - this.dataMin) / bucketWidth);
     }
 }
