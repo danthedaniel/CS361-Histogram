@@ -1,7 +1,5 @@
 package edu.drexel.dpa34;
 
-import java.util.ArrayList;
-import java.util.stream.IntStream;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class HistogramThread implements Runnable {
@@ -10,8 +8,8 @@ public class HistogramThread implements Runnable {
     private final int dataMin;
     private final int dataMax;
     private final int endIndex;
-    private final ArrayList<Integer> dataSet;
-    private ArrayList<Integer> histogram;
+    private final int[] dataSet;
+    private int[] histogram;
     private ReentrantLock lock;
 
     /**
@@ -41,22 +39,24 @@ public class HistogramThread implements Runnable {
     }
 
     /**
-     * Create a new ArrayList for aggregating the values assigned to the thread.
+     * Create a new Array for aggregating the values assigned to the thread.
      *
      * @return The current thread's results
      */
-    private ArrayList<Integer> aggregateData() {
+    private int[] aggregateData() {
         // Initialize the thread's histogram
-        ArrayList<Integer> workerHistogram = new ArrayList<>();
-        IntStream.range(0, this.numBuckets).forEach(i -> workerHistogram.add(0));
+        int[] workerHistogram = new int[this.numBuckets];
+        for (int i = 0; i < numBuckets; i++)
+            workerHistogram[i] = 0;
 
         double bucketWidth = (this.dataMax - this.dataMin) / (double) this.numBuckets;
 
         // Aggregate the data
-        this.dataSet.subList(this.startIndex, this.endIndex).forEach(val -> {
+        for (int i = this.startIndex; i < this.endIndex; i++) {
+            Integer val = this.dataSet[i];
             int index = Math.min(indexForValue(val, bucketWidth), this.numBuckets - 1);
-            workerHistogram.set(index, workerHistogram.get(index) + 1);
-        });
+            workerHistogram[index]++;
+        }
 
         return workerHistogram;
     }
@@ -66,13 +66,11 @@ public class HistogramThread implements Runnable {
      *
      * @param workerHistogram The current thread's results
      */
-    private void addToMainThread(ArrayList<Integer> workerHistogram) {
+    private void addToMainThread(int[] workerHistogram) {
         this.lock.lock();
         try {
-            IntStream.range(0, this.numBuckets).forEach(i -> {
-                int newValue = this.histogram.get(i) + workerHistogram.get(i);
-                this.histogram.set(i, newValue);
-            });
+            for (int i = 0; i < this.numBuckets; i++)
+                this.histogram[i] += workerHistogram[i];
         } finally {
             this.lock.unlock();
         }

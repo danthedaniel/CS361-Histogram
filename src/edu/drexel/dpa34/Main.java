@@ -1,9 +1,7 @@
 package edu.drexel.dpa34;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.IntStream;
 
 public class Main {
     // Maximum and minimum temperatures for our data set, Celsius
@@ -23,11 +21,11 @@ public class Main {
     public static void main(String[] args) {
         // Retrieve command line arguments
         HashMap<String, Integer> argMap = parseArgs(args);
-        int numThreads = argMap.getOrDefault("-NUMTHREADS", 5);
-        int numBuckets = argMap.getOrDefault("-NUMBINS", 10);
-        int dataSize   = argMap.getOrDefault("-DATASIZE", 70000);
+        int numThreads = argMap.getOrDefault("-NUMTHREADS", 4);
+        int numBuckets = argMap.getOrDefault("-NUMBINS", 7);
+        int dataSize   = argMap.getOrDefault("-DATASIZE", 100000000);
 
-        ArrayList<Integer> dataSet = generateDataSet(dataSize);
+        int[] dataSet = generateDataSet(dataSize);
 
 	    ParallelHistogram parallelHist = new ParallelHistogram(numThreads);
         benchmark("Parallel", parallelHist, dataSet, numBuckets);
@@ -37,26 +35,25 @@ public class Main {
     }
 
     /**
-     * Parse arguments that are in the format "KEY1 <integer> KEY2 <integer>".
+     * Parse arguments that are in the format "KEY1 <integer> KEY2 <integer> ...".
      *
      * @param args The command line argument Array
      * @return A mapping of argument names to argument values
      */
     private static HashMap<String, Integer> parseArgs(String[] args) {
         HashMap<String, Integer> argMap = new HashMap<>();
-        String currentArg = "";
 
-        for (String arg : args) {
-            if (currentArg.equals("")) {
-                currentArg = arg;
-            } else {
+        try {
+            String currentArg = args[0];
+
+            for (String arg : args) {
                 try {
                     argMap.put(currentArg, Integer.parseInt(arg));
                 } catch (NumberFormatException e) {
                     currentArg = arg;
                 }
             }
-        }
+        } catch (IndexOutOfBoundsException e) {}
 
         return argMap;
     }
@@ -69,11 +66,13 @@ public class Main {
      * @param dataSet The input data to be aggregated
      * @param numBuckets The number of buckets in the output histogram
      */
-    private static void benchmark(String name, Histogram histogram, ArrayList<Integer> dataSet, int numBuckets) {
+    private static void benchmark(String name, Histogram histogram, int[] dataSet, int numBuckets) {
         long startTime = System.nanoTime();
-        ArrayList<Integer> results = histogram.generateHistogram(dataSet, numBuckets);
+        int[] results = histogram.generateHistogram(dataSet, numBuckets);
         long endTime = System.nanoTime();
-        int total = results.stream().reduce(0, (acc, value) -> acc + value);
+        int total = 0;
+        for (int val : results)
+            total += val;
 
         System.out.print(name + " Results: ");
         printHistogram(results);
@@ -87,9 +86,12 @@ public class Main {
      * @param dataSize The number of elements to generate
      * @return ArrayList of randomly selected (normally distributed) Integers of size dataSize
      */
-    private static ArrayList<Integer> generateDataSet(int dataSize) {
-        ArrayList<Integer> dataSet = new ArrayList<>();
-        IntStream.range(0, dataSize).forEach(i -> dataSet.add(randInt()));
+    private static int[] generateDataSet(int dataSize) {
+        int[] dataSet = new int[dataSize];
+
+        for (int i = 0; i < dataSize; i++)
+            dataSet[i] = randInt();
+
         return dataSet;
     }
 
@@ -107,13 +109,13 @@ public class Main {
      *
      * @param histogram The histogram to be printed
      */
-    private static void printHistogram(ArrayList<Integer> histogram) {
+    private static void printHistogram(int[] histogram) {
         System.out.print("[");
-        for (int i = 0; i < histogram.size(); i++) {
-            System.out.print("(" + i + ": " + histogram.get(i) + ")");
+        for (int i = 0; i < histogram.length; i++) {
+            System.out.print("(" + i + ": " + histogram[i] + ")");
 
             // All elements except the last should be followed by a comma
-            if (i < histogram.size() - 1) {
+            if (i < histogram.length - 1) {
                 System.out.print(", ");
             } else {
                 System.out.println("]");
