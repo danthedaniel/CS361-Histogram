@@ -12,14 +12,14 @@ public class Main {
     public static void main(String[] args) {
         int numBuckets = 10;
         ArrayList<Integer> dataSet = generateDataSet(700);
-	    SerialHistogram serialHist = new SerialHistogram(dataSet);
+	    // SerialHistogram serialHist = new SerialHistogram(dataSet);
 	    ParallelHistogram parallelHist = new ParallelHistogram(dataSet, 4);
 
-	    ArrayList<Integer> serialResults = serialHist.generateHistogram(numBuckets);
+	    // ArrayList<Integer> serialResults = serialHist.generateHistogram(numBuckets);
         ArrayList<Integer> parallelResults = parallelHist.generateHistogram(numBuckets);
 
-        System.out.print("Serial Results: ");
-        printHistogram(serialResults);
+        // System.out.print("Serial Results: ");
+        // printHistogram(serialResults);
         System.out.print("Parallel Results: ");
         printHistogram(parallelResults);
     }
@@ -53,7 +53,7 @@ public class Main {
     private static void printHistogram(ArrayList<Integer> histogram) {
         System.out.print("[");
         for (int i = 0; i < histogram.size(); i++) {
-            System.out.print(histogram.get(i).toString());
+            System.out.print(histogram.get(i));
 
             // All elements except the last should be followed by a comma
             if (i < histogram.size() - 1) {
