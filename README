@@ -1,0 +1,41 @@
+Author: Daniel Angell
+
+MAIN PROGRAM:
+
+The assignment can be built with Ant with the command:
+$ ant build.all.artifacts -f assignment1.xml
+
+The resulting .jar file can be found at out/artifacts/Assignment1_jar
+
+This project was developed with IntelliJ Community Edition, so you'll probably
+need that to explore the project with the greatest level of convenience.
+
+All source code resides in src/edu/drexel/dpa34. The Main class differentiates
+between problems 1 and 2 through the command line argument -SERIAL <0/1>, e.g:
+
+For problem 1:
+$ java -jar Assignment1.jar -SERIAL 1
+
+For problem 2 (the default value is 0):
+$ java -jar Assignment1.jar -SERIAL 0
+
+Other command line arguments that are supported:
+    -NUMTHREADS <number of threads> Defaults to 4
+    -NUMBINS    <number of histogram bins> Defaults to 7
+    -DATASIZE   <number of data elements> Defaults to 7,000,000
+    -VERBOSE    <0 or 1> Defaults to 1
+
+When running the Main class with -VERBOSE set to 0 the only output will be the
+runtime of the selected histogram implementation in milliseconds. Otherwise the
+entire histogram will be printed in addition to other information.
+
+BENCHMARK:
+
+Once the program is built, the multi-threaded implementation can be tested using
+the Ruby script provided in the doc folder. This script will generate comma-
+separated-values which can be saved to a file.
+
+The script should be invoked adjacent to the built .jar file.
+$ benchmark.rb > benchmark.csv
+
+The script takes around 15 minutes to run on tux.

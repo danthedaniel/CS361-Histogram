@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="assignment1" default="all">
+  
+  
+  <property file="assignment1.properties"/>
+  <!-- Uncomment the following property if no tests compilation is needed -->
+  <!-- 
+  <property name="skip.tests" value="true"/>
+   -->
+  
+  <!-- Compiler options -->
+  
+  <property name="compiler.debug" value="on"/>
+  <property name="compiler.generate.no.warnings" value="off"/>
+  <property name="compiler.args" value=""/>
+  <property name="compiler.max.memory" value="700m"/>
+  <patternset id="ignored.files">
+    <exclude name="**/*.hprof/**"/>
+    <exclude name="**/*.pyc/**"/>
+    <exclude name="**/*.pyo/**"/>
+    <exclude name="**/*.rbc/**"/>
+    <exclude name="**/*.yarb/**"/>
+    <exclude name="**/*~/**"/>
+    <exclude name="**/.DS_Store/**"/>
+    <exclude name="**/.git/**"/>
+    <exclude name="**/.hg/**"/>
+    <exclude name="**/.svn/**"/>
+    <exclude name="**/CVS/**"/>
+    <exclude name="**/__pycache__/**"/>
+    <exclude name="**/_svn/**"/>
+    <exclude name="**/vssver.scc/**"/>
+    <exclude name="**/vssver2.scc/**"/>
+  </patternset>
+  <patternset id="library.patterns">
+    <include name="*.war"/>
+    <include name="*.swc"/>
+    <include name="*.apk"/>
+    <include name="*.zip"/>
+    <include name="*.ear"/>
+    <include name="*.egg"/>
+    <include name="*.ane"/>
+    <include name="*.jar"/>
+  </patternset>
+  <patternset id="compiler.resources">
+    <exclude name="**/?*.java"/>
+    <exclude name="**/?*.form"/>
+    <exclude name="**/?*.class"/>
+    <exclude name="**/?*.groovy"/>
+    <exclude name="**/?*.scala"/>
+    <exclude name="**/?*.flex"/>
+    <exclude name="**/?*.kt"/>
+    <exclude name="**/?*.clj"/>
+    <exclude name="**/?*.aj"/>
+  </patternset>
+  
+  <!-- JDK definitions -->
+  
+  <property name="jdk.bin.1.8" value="${jdk.home.1.8}/bin"/>
+  <path id="jdk.classpath.1.8">
+    <fileset dir="${jdk.home.1.8}">
+      <include name="jre/lib/charsets.jar"/>
+      <include name="jre/lib/deploy.jar"/>
+      <include name="jre/lib/ext/cldrdata.jar"/>
+      <include name="jre/lib/ext/dnsns.jar"/>
+      <include name="jre/lib/ext/jaccess.jar"/>
+      <include name="jre/lib/ext/jfxrt.jar"/>
+      <include name="jre/lib/ext/localedata.jar"/>
+      <include name="jre/lib/ext/nashorn.jar"/>
+      <include name="jre/lib/ext/sunec.jar"/>
+      <include name="jre/lib/ext/sunjce_provider.jar"/>
+      <include name="jre/lib/ext/sunpkcs11.jar"/>
+      <include name="jre/lib/ext/zipfs.jar"/>
+      <include name="jre/lib/javaws.jar"/>
+      <include name="jre/lib/jce.jar"/>
+      <include name="jre/lib/jfr.jar"/>
+      <include name="jre/lib/jfxswt.jar"/>
+      <include name="jre/lib/jsse.jar"/>
+      <include name="jre/lib/management-agent.jar"/>
+      <include name="jre/lib/plugin.jar"/>
+      <include name="jre/lib/resources.jar"/>
+      <include name="jre/lib/rt.jar"/>
+    </fileset>
+  </path>
+  
+  <property name="project.jdk.home" value="${jdk.home.1.8}"/>
+  <property name="project.jdk.bin" value="${jdk.bin.1.8}"/>
+  <property name="project.jdk.classpath" value="jdk.classpath.1.8"/>
+  
+  <!-- Modules -->
+  
+  
+  <!-- Module Assignment1 -->
+  
+  <dirname property="module.assignment1.basedir" file="${ant.file}"/>
+  
+  
+  <property name="module.jdk.home.assignment1" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.assignment1" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.assignment1" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.assignment1" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="assignment1.output.dir" value="${module.assignment1.basedir}/out/production/Assignment1"/>
+  <property name="assignment1.testoutput.dir" value="${module.assignment1.basedir}/out/test/Assignment1"/>
+  
+  <path id="assignment1.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="assignment1.module.production.classpath">
+    <path refid="${module.jdk.classpath.assignment1}"/>
+  </path>
+  
+  <path id="assignment1.runtime.production.module.classpath">
+    <pathelement location="${assignment1.output.dir}"/>
+  </path>
+  
+  <path id="assignment1.module.classpath">
+    <path refid="${module.jdk.classpath.assignment1}"/>
+    <pathelement location="${assignment1.output.dir}"/>
+  </path>
+  
+  <path id="assignment1.runtime.module.classpath">
+    <pathelement location="${assignment1.testoutput.dir}"/>
+    <pathelement location="${assignment1.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.assignment1">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.assignment1">
+    <patternset refid="excluded.from.module.assignment1"/>
+  </patternset>
+  
+  <path id="assignment1.module.sourcepath">
+    <dirset dir="${module.assignment1.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.assignment1" depends="compile.module.assignment1.production,compile.module.assignment1.tests" description="Compile module Assignment1"/>
+  
+  <target name="compile.module.assignment1.production" description="Compile module Assignment1; production classes">
+    <mkdir dir="${assignment1.output.dir}"/>
+    <javac destdir="${assignment1.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.assignment1}/javac">
+      <compilerarg line="${compiler.args.assignment1}"/>
+      <bootclasspath refid="assignment1.module.bootclasspath"/>
+      <classpath refid="assignment1.module.production.classpath"/>
+      <src refid="assignment1.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.assignment1"/>
+    </javac>
+    
+    <copy todir="${assignment1.output.dir}">
+      <fileset dir="${module.assignment1.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.assignment1.tests" depends="compile.module.assignment1.production" description="compile module Assignment1; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.assignment1" description="cleanup module">
+    <delete dir="${assignment1.output.dir}"/>
+    <delete dir="${assignment1.testoutput.dir}"/>
+  </target>
+  
+  <target name="init" description="Build initialization">
+    <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.module.assignment1" description="cleanup all"/>
+  
+  <target name="build.modules" depends="init, clean, compile.module.assignment1" description="build all modules"/>
+  
+  <target name="init.artifacts">
+    <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
+    <property name="artifact.output.assignment1:jar" value="${basedir}/out/artifacts/Assignment1_jar"/>
+    <mkdir dir="${artifacts.temp.dir}"/>
+    <property name="temp.jar.path.Assignment1.jar" value="${artifacts.temp.dir}/Assignment1.jar"/>
+  </target>
+  
+  <target name="artifact.assignment1:jar" depends="init.artifacts, compile.module.assignment1" description="Build &#39;Assignment1:jar&#39; artifact">
+    <property name="artifact.temp.output.assignment1:jar" value="${artifacts.temp.dir}/Assignment1_jar"/>
+    <mkdir dir="${artifact.temp.output.assignment1:jar}"/>
+    <jar destfile="${temp.jar.path.Assignment1.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
+      <zipfileset dir="${assignment1.output.dir}"/>
+    </jar>
+    <copy file="${temp.jar.path.Assignment1.jar}" tofile="${artifact.temp.output.assignment1:jar}/Assignment1.jar"/>
+  </target>
+  
+  <target name="build.all.artifacts" depends="artifact.assignment1:jar" description="Build all artifacts">
+    <mkdir dir="${artifact.output.assignment1:jar}"/>
+    <copy todir="${artifact.output.assignment1:jar}">
+      <fileset dir="${artifact.temp.output.assignment1:jar}"/>
+    </copy>
+    
+    <!-- Delete temporary files -->
+    <delete dir="${artifacts.temp.dir}"/>
+  </target>
+  
+  <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
+</project>

@@ -8,26 +8,32 @@ public class Main {
      * Threaded vs. Serial Histogram construction benchmark.
      *
      * Accepts the following command line arguments:
-     *      -NUMTHREADS <number of threads>
-     *      -NUMBINS    <number of histogram bins>
-     *      -DATASIZE   <number of data elements>
+     *      -NUMTHREADS <number of threads> Defaults to 4
+     *      -NUMBINS    <number of histogram bins> Defaults to 7
+     *      -DATASIZE   <number of data elements> Defaults to 7,000,000
+     *      -VERBOSE    <0 or 1> Defaults to 1
+     *      -SERIAL     <0 or 1> Defaults to 0. Will only run the SerialHistogram class if set to 1
      *
      * @param args The command line arguments
      */
     public static void main(String[] args) {
         // Retrieve command line arguments
         HashMap<String, Integer> argMap = parseArgs(args);
-        int numThreads = argMap.getOrDefault("-NUMTHREADS", 4);
-        int numBuckets = argMap.getOrDefault("-NUMBINS", 7);
-        int dataSize   = argMap.getOrDefault("-DATASIZE", 100000000);
+        int numThreads  = argMap.getOrDefault("-NUMTHREADS", 4);
+        int numBuckets  = argMap.getOrDefault("-NUMBINS", 7);
+        int dataSize    = argMap.getOrDefault("-DATASIZE", 7000000);
+        boolean verbose = argMap.getOrDefault("-VERBOSE", 1) == 1;
+        boolean serial  = argMap.getOrDefault("-SERIAL", 0) == 1;
 
         int[] dataSet = generateDataSet(dataSize);
 
-	    ParallelHistogram parallelHist = new ParallelHistogram(numThreads);
-        benchmark("Parallel", parallelHist, dataSet, numBuckets);
-
-        SerialHistogram serialHist = new SerialHistogram();
-        benchmark("Serial", serialHist, dataSet, numBuckets);
+        if (serial) {
+            SerialHistogram serialHist = new SerialHistogram();
+            benchmark("Serial", serialHist, dataSet, numBuckets, verbose);
+        } else {
+            ParallelHistogram parallelHist = new ParallelHistogram(numThreads);
+            benchmark("Parallel", parallelHist, dataSet, numBuckets, verbose);
+        }
     }
 
     /**
@@ -49,9 +55,7 @@ public class Main {
                     currentArg = arg;
                 }
             }
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("No arguments provided. Will use defaults.");
-        }
+        } catch (IndexOutOfBoundsException e) {}
 
         return argMap;
     }
@@ -63,8 +67,9 @@ public class Main {
      * @param histogram The Histogram implementation being tested
      * @param dataSet The input data to be aggregated
      * @param numBuckets The number of buckets in the output histogram
+     * @param verbose Will only print runtime when false
      */
-    private static void benchmark(String name, Histogram histogram, int[] dataSet, int numBuckets) {
+    private static void benchmark(String name, Histogram histogram, int[] dataSet, int numBuckets, boolean verbose) {
         long startTime = System.nanoTime();
         int[] results = histogram.generateHistogram(dataSet, numBuckets);
         long endTime = System.nanoTime();
@@ -72,10 +77,12 @@ public class Main {
         for (int val : results)
             total += val;
 
-        System.out.print(name + " Results: ");
-        printHistogram(results);
-        System.out.println("Total: " + total);
-        System.out.println(name + " ran in " + (endTime - startTime) / 1000000 + "ms");
+        if (verbose) {
+            System.out.print(name + " Results: ");
+            printHistogram(results);
+            System.out.println("Total: " + total);
+        }
+        System.out.println((endTime - startTime) / 1000000 + "ms");
     }
 
     /**

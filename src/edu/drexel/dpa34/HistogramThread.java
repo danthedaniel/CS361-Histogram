@@ -21,14 +21,16 @@ public class HistogramThread implements Runnable {
      * @param endIndex The worker's designated ending point
      */
     HistogramThread(ParallelHistogram parent, int startIndex, int endIndex) {
+        this.startIndex = startIndex;
+        this.endIndex   = endIndex;
+
+        // Copy necessary references from the parent class
         this.dataSet    = parent.dataSet;
         this.dataMin    = parent.dataMin;
         this.dataMax    = parent.dataMax;
         this.lock       = parent.lock;
         this.histogram  = parent.histogram;
         this.numBuckets = parent.numBuckets;
-        this.startIndex = startIndex;
-        this.endIndex   = endIndex;
     }
 
     /**
