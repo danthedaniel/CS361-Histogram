@@ -2,7 +2,7 @@ package edu.drexel.dpa34;
 
 public class SerialHistogram implements Histogram {
     /**
-     * Generates Histograms without any parallelization.
+     * Generates Histograms without any multi-threading.
      */
     SerialHistogram() {}
 

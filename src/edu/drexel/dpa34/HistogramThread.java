@@ -39,7 +39,7 @@ public class HistogramThread implements Runnable {
     }
 
     /**
-     * Create a new Array for aggregating the values assigned to the thread.
+     * Aggregate the subset of data that is assigned to the thread.
      *
      * @return The current thread's results
      */

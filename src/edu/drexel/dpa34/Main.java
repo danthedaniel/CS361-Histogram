@@ -4,10 +4,6 @@ import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Main {
-    // Maximum and minimum temperatures for our data set, Celsius
-    private static int tempMin = -10;
-    private static int tempMax = 35;
-
     /**
      * Threaded vs. Serial Histogram construction benchmark.
      *
@@ -53,7 +49,9 @@ public class Main {
                     currentArg = arg;
                 }
             }
-        } catch (IndexOutOfBoundsException e) {}
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("No arguments provided. Will use defaults.");
+        }
 
         return argMap;
     }
@@ -101,6 +99,9 @@ public class Main {
      * @return The randomly selected number
      */
     private static Integer randInt() {
+        // Maximum and minimum temperatures for our data set, Celsius
+        final int tempMin = -10;
+        final int tempMax = 35;
         return ThreadLocalRandom.current().nextInt(tempMin, tempMax);
     }
 
