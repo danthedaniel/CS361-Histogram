@@ -8,7 +8,7 @@ public class HistogramThread implements Runnable {
     private final int dataMin;
     private final int dataMax;
     private final int endIndex;
-    private final int[] dataSet;
+    public static int[] dataSet;
     private int[] histogram;
     private ReentrantLock lock;
 
@@ -25,7 +25,6 @@ public class HistogramThread implements Runnable {
         this.endIndex   = endIndex;
 
         // Copy necessary references from the parent class
-        this.dataSet    = parent.dataSet;
         this.dataMin    = parent.dataMin;
         this.dataMax    = parent.dataMax;
         this.lock       = parent.lock;

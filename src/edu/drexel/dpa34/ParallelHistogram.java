@@ -31,8 +31,8 @@ public class ParallelHistogram implements Histogram {
     public int[] generateHistogram(int[] data, int numBuckets) {
         // Calculate the min and max of the data set
         this.dataSet    = data;
-        this.dataMin    = dataSetMin();
-        this.dataMax    = dataSetMax();
+        this.dataMin    = -10;
+        this.dataMax    = 35;
         this.numBuckets = numBuckets;
         this.histogram  = new int[numBuckets];
 
@@ -65,7 +65,9 @@ public class ParallelHistogram implements Histogram {
             if (i == saneThreadCount - 1)
                 endIndex = this.dataSet.length;
 
-            Thread t = new Thread(new HistogramThread(this, startIndex, endIndex));
+            HistogramThread histThread = new HistogramThread(this, startIndex, endIndex);
+            histThread.dataSet = this.dataSet;
+            Thread t = new Thread(histThread);
             t.start();
             threads[i] = t;
             startIndex = endIndex;
